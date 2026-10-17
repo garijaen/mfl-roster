@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#142139">
+  <meta name="description" content="Consulta rápida de dorsales y nombres de tu equipo de fútbol americano.">
+  <title>Mi Roster · Fútbol Americano</title>
+  <style>
+    :root{color-scheme:dark;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#101827;color:#f2f6ff}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100dvh;background:radial-gradient(circle at 100% -15%,#293d60 0,transparent 52%),#101827}
+    button,input{font:inherit}button{cursor:pointer}
+    .wrap{max-width:780px;margin:0 auto;padding:22px 18px 40px}
+    .topline{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:22px}
+    .brand{display:flex;align-items:center;gap:10px}
+    .ball{display:grid;place-items:center;font-size:27px;background:#2a3953;border:1px solid #3c4c64;width:46px;height:46px;border-radius:14px}
+    .overline{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#a0b2d2;font-weight:750}
+    h1{font-size:24px;line-height:1.1;margin:4px 0 0;letter-spacing:-.035em}
+    .count{font-size:12px;font-weight:750;color:#cae6ff;background:#293d58;border:1px solid #3e5574;padding:8px 12px;border-radius:999px;white-space:nowrap}
+    label[for="numero"]{display:block;font-size:13px;font-weight:700;color:#c8d5ea;margin-bottom:10px}
+    .search{position:relative;display:flex;align-items:center;background:#f4f7fc;color:#13213a;border-radius:19px;box-shadow:0 14px 26px #060e1c33}
+    .search svg{flex:none;margin-left:18px}
+    .search input{min-width:0;width:100%;font-size:25px;font-weight:750;letter-spacing:.025em;color:#17233a;background:transparent;border:0;outline:0;padding:18px 6px 18px 16px}
+    .search input::placeholder{font-size:17px;font-weight:450;color:#67778e;letter-spacing:0}
+    .clear{flex:none;margin-right:9px;border:0;background:#e2e8f1;color:#253d5c;padding:0;width:38px;height:38px;border-radius:12px;font-size:25px;line-height:1}
+    .clear[hidden]{display:none}
+    .helper{margin:10px 2px 21px;color:#9baecb;font-size:12px}
+    .panelhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:13px}
+    .panelhead h2{margin:0;font-size:16px;letter-spacing:-.015em}
+    .panelhead span{font-size:12px;color:#a4b4cd}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .player{min-height:112px;display:flex;flex-direction:column;justify-content:space-between;gap:8px;background:#24354f;border:1px solid #3a4d6b;border-radius:17px;padding:16px;transition:opacity .13s ease}
+    .player .jersey{font-size:38px;font-weight:900;line-height:1;letter-spacing:-.05em;font-variant-numeric:tabular-nums}
+    .player .pname{font-size:15px;font-weight:750;overflow-wrap:anywhere;line-height:1.15}
+    .player.seen{opacity:.38}
+    .result{min-height:290px;background:linear-gradient(150deg,#344c71,#243650);border:1px solid #4b6488;border-radius:22px;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:28px 16px;position:relative;overflow:hidden;gap:9px}
+    .result.seen{opacity:.45}
+    .result .rlabel{color:#bfd0e5;font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
+    .result .rnumber{font-size:clamp(86px,22vw,150px);line-height:1;font-weight:950;letter-spacing:-.08em;font-variant-numeric:tabular-nums;max-width:100%;overflow-wrap:anywhere}
+    .result .rname{font-size:clamp(31px,8.7vw,58px);font-weight:900;line-height:1.04;letter-spacing:-.045em;overflow-wrap:anywhere}
+    .timerline{height:4px;background:#33435b;border-radius:9px;overflow:hidden;margin-top:13px}
+    .timerline>div{height:100%;width:100%;background:#accbea;animation:shrink 3s linear forwards;transform-origin:left}
+    @keyframes shrink{to{transform:scaleX(0)}}
+    .noresult{border:1px dashed #526785;border-radius:18px;padding:45px 16px;color:#ccdbef;text-align:center}
+    .noresult strong{display:block;font-size:23px;color:#fff;margin-bottom:8px}
+    .tools{margin-top:25px;padding-top:19px;border-top:1px solid #2e405a;display:flex;gap:9px;flex-wrap:wrap}
+    .btn{appearance:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;border-radius:12px;border:1px solid #4a617e;background:#2a3c55;color:#f6f8ff;padding:10px 13px;font-weight:750;font-size:13px;text-decoration:none}
+    .btn.secondary{background:transparent;color:#c9d7ea}
+    .btn:focus-visible,.clear:focus-visible,.search:focus-within{outline:3px solid #8ac3ff;outline-offset:2px}
+    .foot{font-size:12px;line-height:1.5;color:#93a8c4;margin-top:14px}
+    .notice{margin-top:12px;color:#cde7ff;font-size:13px;min-height:19px}
+    .empty{border:1px dashed #485e7c;background:#1c2b41;border-radius:18px;padding:28px 20px;text-align:center;color:#bdcce2;line-height:1.5}
+    .empty strong{display:block;color:white;font-size:21px;margin-bottom:5px}
+    .empty .btn{margin-top:15px}
+    @media(min-width:620px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.wrap{padding-top:35px}.player{min-height:132px}.player .jersey{font-size:46px}}
+    @media(prefers-reduced-motion:reduce){.player{transition:none}}
+  </style>
+  <!-- La biblioteca de Excel se carga solo al importar .xlsx/.xls. -->
+  <script defer>
+    document.addEventListener('DOMContentLoaded',()=>{
+      'use strict';
+      const ROSTER_KEY='mi-roster-jugadores-v1';
+      const SEEN_KEY='mi-roster-consultados-v1';
+      const el=id=>document.getElementById(id);
+      const input=el('numero'), clear=el('limpiar'), content=el('contenido'), counter=el('conteo'), msg=el('mensaje');
+      let roster=[],seen=new Set(),timer=null,activeWasSeen=false,lastNumber=null,notification=null;
+      const sample=[['4','Mateo'],['7','Santiago'],['12','Diego'],['23','Leonardo'],['43','Emiliano'],['88','Sebastián']];
+      function notice(message){msg.textContent=message;clearTimeout(notification);notification=setTimeout(()=>msg.textContent='',6200)}
+      function save(){try{localStorage.setItem(ROSTER_KEY,JSON.stringify(roster));localStorage.setItem(SEEN_KEY,JSON.stringify([...seen]))}catch(e){notice('No se pudo guardar en este navegador. Revisa el espacio o modo privado.')}}
+      function load(){try{const rs=JSON.parse(localStorage.getItem(ROSTER_KEY)||'[]');const ss=JSON.parse(localStorage.getItem(SEEN_KEY)||'[]');roster=Array.isArray(rs)?rs.filter(p=>p&&typeof p.number==='string'&&typeof p.name==='string'):[];seen=new Set(Array.isArray(ss)?ss:[])}catch(e){roster=[];seen=new Set()}}
+      function sortPlayers(){roster.sort((a,b)=>Number(a.number)-Number(b.number)||a.number.localeCompare(b.number,'es'))}
+      function node(tag,cls,value){let n=document.createElement(tag);if(cls)n.className=cls;if(value!==undefined)n.textContent=value;return n}
+      function resetSearch(){clearTimeout(timer);input.value='';activeWasSeen=false;lastNumber=null;render()}
+      function showPlayer(p){
+        const wrap=node('div','');
+        const panel=node('div','result'+(activeWasSeen?' seen':''));
+        panel.append(node('div','rlabel','JUGADOR #'),node('div','rnumber',p.number),node('div','rname',p.name.toLocaleUpperCase('es')));
+        panel.setAttribute('aria-label',`Jugador número ${p.number}: ${p.name}${activeWasSeen?', ya consultado':''}`);
+        wrap.append(panel,node('div','timerline'));
+        wrap.lastChild.appendChild(node('div',''));
+        content.appendChild(wrap)
+      }
+      function render(){
+        const value=input.value.trim();clear.hidden=!value;content.replaceChildren();counter.textContent=`${roster.length} jugador${roster.length===1?'':'es'}`;
+        if(value){
+          const p=roster.find(player=>player.number===value);
+          if(p){showPlayer(p)}else{
+            const empty=node('div','noresult');empty.append(node('strong','','#'+value),node('div','','Jugador no encontrado'));content.appendChild(empty)
+          }
+          return;
+        }
+        if(!roster.length){
+          const empty=node('div','empty');empty.append(node('strong','','¡El equipo está listo para empezar!'),node('div','','Importa tu lista desde Excel o prueba primero con jugadores de ejemplo.'));
+          const b=node('button','btn','Probar con jugadores de ejemplo');b.type='button';b.addEventListener('click',()=>{setRoster(sample.map(p=>({number:p[0],name:p[1]})));notice('Lista de ejemplo cargada. Prueba buscar el número 4 y luego 43.');});empty.appendChild(b);content.appendChild(empty);return;
+        }
+        const header=node('div','panelhead');header.append(node('h2','','Todo el equipo'),node('span','',`${seen.size} consultado${seen.size===1?'':'s'}`));content.appendChild(header);
+        const grid=node('div','grid');for(const p of roster){const card=node('div','player'+(seen.has(p.number)?' seen':''));card.append(node('div','jersey',p.number),node('div','pname',p.name));grid.appendChild(card)}content.appendChild(grid)
+      }
+      function onInput(){
+        const filtered=input.value.replace(/\D/g,'');if(input.value!==filtered)input.value=filtered;
+        clearTimeout(timer);
+        const value=input.value;
+        if(value){
+          if(value!==lastNumber){activeWasSeen=seen.has(value);lastNumber=value}
+          const hit=roster.find(p=>p.number===value);
+          if(hit&&!seen.has(value)){seen.add(value);save()}
+          timer=setTimeout(resetSearch,3000)
+        }else{activeWasSeen=false;lastNumber=null}
+        render()
+      }
+      function setRoster(players){roster=players;sortPlayers();seen=new Set();resetSearch();save()}
+      function parseCSV(s){
+        s=s.replace(/^\uFEFF/,'').replace(/^sep=[,;\t]\r?\n/i,'');
+        const firstLine=s.split(/\r?\n/,1)[0]||'';const delim=(firstLine.match(/;/g)||[]).length>(firstLine.match(/,/g)||[]).length?';':',';
+        const rows=[];let row=[],col='',quoted=false;
+        for(let i=0;i<s.length;i++){
+          const c=s[i];if(c==='"'){if(quoted&&s[i+1]==='"'){col+='"';i++}else{quoted=!quoted}}
+          else if(c===delim&&!quoted){row.push(col);col=''}
+          else if((c==='\n'||c==='\r')&&!quoted){if(c==='\r'&&s[i+1]==='\n')i++;row.push(col);if(row.some(x=>x.trim()))rows.push(row);row=[];col=''}
+          else col+=c;
+        }
+        row.push(col);if(row.some(x=>x.trim()))rows.push(row);return rows
+      }
+      async function ensureExcelReader(){
+        if(window.XLSX)return;
+        await new Promise((resolve,reject)=>{
+          const script=document.createElement('script');
+          script.src='https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js';
+          script.onload=()=>window.XLSX?resolve():reject(Error('El lector Excel no está disponible.'));
+          script.onerror=()=>reject(Error('No se pudo cargar el lector Excel. Conéctate a internet o guarda el archivo como CSV.'));
+          document.head.appendChild(script);
+        });
+      }
+      function importRows(rows){
+        if(!Array.isArray(rows)||!rows.length)throw Error('El archivo está vacío.');
+        const pairs=rows.filter(r=>Array.isArray(r)&&r.some(x=>String(x??'').trim()!==''))
+          .map(r=>[String(r[0]??'').trim(),String(r[1]??'').trim()]);
+        const normalize=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+        if(pairs.length&&['numero','num','dorsal','#','number'].includes(normalize(pairs[0][0]))&&['nombre','name','jugador','apodo'].includes(normalize(pairs[0][1])))pairs.shift();
+        if(!pairs.length)throw Error('No se encontraron jugadores.');
+        const players=[],unique=new Set();
+        for(let i=0;i<pairs.length;i++){
+          const [number,name]=pairs[i];
+          if(!/^\d+$/.test(number)||!name)throw Error(`Revisa la fila ${i+1}: se requiere número y nombre.`);
+          if(unique.has(number))throw Error(`El número ${number} está repetido. Cada dorsal debe ser único.`);
+          unique.add(number);players.push({number,name});
+        }
+        return players
+      }
+      el('archivo').addEventListener('change',async ev=>{
+        const file=ev.target.files?.[0];if(!file)return;
+        try{
+          let rows=[];
+          if(/\.csv$/i.test(file.name))rows=parseCSV(await file.text());
+          else{
+            await ensureExcelReader();
+            const workbook=XLSX.read(await file.arrayBuffer(),{type:'array'});
+            const sheet=workbook.Sheets[workbook.SheetNames[0]];
+            rows=XLSX.utils.sheet_to_json(sheet,{header:1,raw:false,defval:'',blankrows:false});
+          }
+          const players=importRows(rows);
+          if(roster.length&&!window.confirm(`¿Reemplazar los ${roster.length} jugadores actuales por ${players.length} del nuevo archivo? También se reiniciarán las marcas.`))return;
+          setRoster(players);notice(`${players.length} jugadores importados correctamente. Los datos quedan guardados en este navegador.`)
+        }catch(e){notice('Importación fallida: '+(e.message||String(e)))}finally{ev.target.value=''}
+      });
+      el('reiniciar').addEventListener('click',()=>{
+        if(!roster.length)return;
+        if(!window.confirm('¿Iniciar nuevo partido? Se quitará el opacado de todos los jugadores, sin borrar la lista.'))return;
+        seen.clear();save();resetSearch();notice('Nuevo partido: marcas reiniciadas.');
+      });
+      input.addEventListener('input',onInput);
+      clear.addEventListener('click',()=>{resetSearch();input.focus()});
+      load();sortPlayers();render();
+    });
+  </script>
+</head>
+<body>
+  <main class="wrap">
+    <header class="topline">
+      <div class="brand"><div class="ball" aria-hidden="true">🏈</div><div><div class="overline">Consulta rápida</div><h1>Mi Roster</h1></div></div>
+      <span class="count" id="conteo">0 jugadores</span>
+    </header>
+    <label for="numero">Número de camiseta</label>
+    <div class="search">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#536780" stroke-width="2.3" stroke-linecap="round"><circle cx="10.8" cy="10.8" r="6.7"/><path d="m16 16 5 5"/></svg>
+      <input id="numero" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Escribe el número…" autocomplete="off" spellcheck="false" aria-label="Buscar jugador por número exacto">
+      <button id="limpiar" class="clear" type="button" aria-label="Limpiar búsqueda" hidden>×</button>
+    </div>
+    <p class="helper">Busca el número exacto. La búsqueda se limpia sola 3 segundos después del último cambio.</p>
+    <section id="contenido" aria-live="polite" aria-atomic="true"></section>
+    <section class="tools" aria-label="Herramientas del equipo">
+      <label for="archivo" class="btn">📁 Importar Excel / CSV</label>
+      <input id="archivo" type="file" accept=".xlsx,.xls,.csv" hidden>
+      <button class="btn secondary" id="reiniciar" type="button">↻ Nuevo partido</button>
+    </section>
+    <div id="mensaje" class="notice" role="status" aria-live="polite"></div>
+    <p class="foot">Archivo: columnas <strong>Número</strong> y <strong>Nombre</strong>, en ese orden. Al importar una lista nueva se reemplaza la anterior. Los jugadores y sus marcas se guardan solo en este navegador mediante almacenamiento local; no se envían a GitHub. Para abrir .xlsx es necesario que cargue la biblioteca externa de Excel.</p>
+  </main>
+</body>
+</html>
